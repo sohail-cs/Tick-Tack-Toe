@@ -1,0 +1,170 @@
+#include <stdio.h>
+
+#define MAX_N 100 // Define the maximum size for the board
+int n; // Size of the board (n x n)
+char board[MAX_N][MAX_N]; // 2D array to represent the game board
+char current_marker; // Current player's marker ('X' or 'O')
+int current_player; // Current player's number (1 or 2)
+
+// Function to initialize the game board with empty spaces
+void initialize_board() {
+    int i, j;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            board[i][j] = ' '; // Set each cell to an empty space
+        }
+    }
+}
+
+// Function to print the current state of the game board
+void print_board() {
+    int i, j;
+    printf("  ");
+    for (i = 0; i < n; i++) {
+        printf("%d ", i); // Print column headers
+    }
+    printf("\n");
+    for (i = 0; i < n; i++) {
+        printf("%d ", i); // Print row headers
+        for (j = 0; j < n; j++) {
+            printf("%c", board[i][j]); // Print cell content
+            if (j < n - 1) printf("|"); // Print column separator
+        }
+        printf("\n");
+        if (i < n - 1) {
+            printf("  ");
+            for (j = 0; j < n; j++) {
+                printf("-"); // Print row separator
+                if (j < n - 1) printf("+"); // Print intersection
+            }
+            printf("\n");
+        }
+    }
+}
+
+// Function to check if there is a winner
+int check_winner() {
+    int i, j;
+    char marker;
+
+    // Check rows for a winner
+    for (i = 0; i < n; i++) {
+        marker = board[i][0];
+        if (marker != ' ') {
+            for (j = 1; j < n; j++) {
+                if (board[i][j] != marker) break;
+            }
+            if (j == n) return 1; // All cells in the row match
+        }
+    }
+
+    // Check columns for a winner
+    for (i = 0; i < n; i++) {
+        marker = board[0][i];
+        if (marker != ' ') {
+            for (j = 1; j < n; j++) {
+                if (board[j][i] != marker) break;
+            }
+            if (j == n) return 1; // All cells in the column match
+        }
+    }
+
+    // Check main diagonal for a winner
+    marker = board[0][0];
+    if (marker != ' ') {
+        for (i = 1; i < n; i++) {
+            if (board[i][i] != marker) break;
+        }
+        if (i == n) return 1; // All cells in the main diagonal match
+    }
+
+    // Check anti-diagonal for a winner
+    marker = board[0][n-1];
+    if (marker != ' ') {
+        for (i = 1; i < n; i++) {
+            if (board[i][n-i-1] != marker) break;
+        }
+        if (i == n) return 1; // All cells in the anti-diagonal match
+    }
+
+    return 0; // No winner found
+}
+
+// Function to check if the game is a draw
+int is_draw() {
+    int i, j;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            if (board[i][j] == ' ') {
+                return 0; // Found an empty cell, not a draw
+            }
+        }
+    }
+    return 1; // No empty cells, it's a draw
+}
+
+// Function to switch the current player
+void switch_player() {
+    if (current_marker == 'X') {
+        current_marker = 'O';
+        current_player = 2;
+    } else {
+        current_marker = 'X';
+        current_player = 1;
+    }
+}
+
+// Function to make a move on the board
+void make_move(int row, int col) {
+    if (board[row][col] == ' ') {
+        board[row][col] = current_marker; // Place the marker on the board
+    } else {
+        printf("This spot is taken!\n"); // Inform the player that the cell is already occupied
+    }
+}
+
+int main() {
+    int row, col;
+
+    printf("Enter the size of the board (n): ");
+    scanf("%d", &n);
+
+    // Validate the board size
+    if (n > MAX_N || n <= 0) {
+        printf("Invalid board size. The size should be between 1 and %d.\n", MAX_N);
+        return 1; // Exit the program if the size is invalid
+    }
+
+    initialize_board(); // Initialize the game board
+    current_marker = 'X'; // Set the starting marker
+    current_player = 1; // Set the starting player
+
+    while (1) {
+        print_board(); // Print the current state of the board
+        printf("Player %d, enter your move (row and column): ", current_player);
+        scanf("%d %d", &row, &col);
+
+        // Validate the move
+        if (row >= 0 && row < n && col >= 0 && col < n) {
+            make_move(row, col); // Make the move
+
+            // Check if the move results in a win
+            if (check_winner()) {
+                print_board();
+                printf("Player %d wins!\n", current_player);
+                break;
+            // Check if the game is a draw
+            } else if (is_draw()) {
+                print_board();
+                printf("It's a draw!\n");
+                break;
+            }
+
+            switch_player(); // Switch to the other player
+        } else {
+            printf("Invalid move. Try again.\n"); // Inform the player that the move is invalid
+        }
+    }
+
+    return 0; // End the program
+}
